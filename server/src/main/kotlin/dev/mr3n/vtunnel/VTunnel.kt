@@ -1,20 +1,14 @@
 package dev.mr3n.vtunnel
 
 import com.velocitypowered.api.event.Subscribe
-import com.velocitypowered.api.event.connection.ConnectionHandshakeEvent
-import com.velocitypowered.api.event.connection.LoginEvent
-import com.velocitypowered.api.event.connection.PreLoginEvent
 import com.velocitypowered.api.event.player.KickedFromServerEvent
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent
-import com.velocitypowered.api.event.player.ServerPreConnectEvent
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent
 import com.velocitypowered.api.event.proxy.ProxyPingEvent
 import com.velocitypowered.api.plugin.Plugin
 import com.velocitypowered.api.proxy.ProxyServer
 import com.velocitypowered.api.proxy.server.RegisteredServer
 import dev.mr3n.vtunnel.tunnel.startTunnelingAllocator
-import net.kyori.adventure.text.Component
-import org.w3c.dom.Text
 import java.net.InetSocketAddress
 import java.util.*
 import java.util.logging.Logger
