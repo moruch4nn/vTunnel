@@ -1,5 +1,6 @@
 package dev.mr3n.vtunnel
 
+import com.velocitypowered.api.event.PostOrder
 import com.velocitypowered.api.event.Subscribe
 import com.velocitypowered.api.event.player.KickedFromServerEvent
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent
@@ -18,24 +19,24 @@ import kotlin.jvm.optionals.getOrNull
 
 @Plugin(id = "vtunnel")
 class VTunnel @Inject constructor(val server: ProxyServer, logger: Logger) {
-    @Subscribe
+    @Subscribe(order = PostOrder.FIRST)
     fun on(event: ProxyInitializeEvent) {
         thread { startTunnelingAllocator() }
     }
 
-    @Subscribe
+    @Subscribe(order = PostOrder.FIRST)
     fun on(event: PlayerChooseInitialServerEvent) {
         val virtualHostStr = event.player.virtualHost.map(InetSocketAddress::getHostString).orElse("").lowercase(Locale.ROOT)
         (customForcedHosts[virtualHostStr]?:tryServer())?.let(event::setInitialServer)
     }
 
-    @Subscribe
+    @Subscribe(order = PostOrder.FIRST)
     fun on(event: ProxyPingEvent) {
         val virtualHostStr = event.connection.virtualHost.map(InetSocketAddress::getHostString).orElse("").lowercase(Locale.ROOT)
         (customForcedHosts[virtualHostStr]?:tryServer())?.ping()?.get().let(event::setPing)
     }
 
-    @Subscribe
+    @Subscribe(order = PostOrder.FIRST)
     fun on(event: KickedFromServerEvent) {
         val server = tryServer(event.server.serverInfo.name)
         event.result = KickedFromServerEvent.RedirectPlayer.create(server)
