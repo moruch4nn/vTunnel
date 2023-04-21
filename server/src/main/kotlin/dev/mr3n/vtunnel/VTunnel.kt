@@ -36,6 +36,12 @@ class VTunnel @Inject constructor(val server: ProxyServer, val logger: Logger) {
     }
 
     @Subscribe
+    fun on(event: ProxyPingEvent) {
+        val virtualHostStr = event.connection.virtualHost.map(InetSocketAddress::getHostString).orElse("").lowercase(Locale.ROOT)
+        (customForcedHosts[virtualHostStr]?:tryServer())?.ping()?.get().let(event::setPing)
+    }
+
+    @Subscribe
     fun on(event: KickedFromServerEvent) {
         val server = tryServer(event.server.serverInfo.name)
         event.result = KickedFromServerEvent.RedirectPlayer.create(server)
@@ -58,8 +64,10 @@ class VTunnel @Inject constructor(val server: ProxyServer, val logger: Logger) {
             tryFirst.map(SERVER::getServer)
                 .mapNotNull(Optional<RegisteredServer>::getOrNull)
                 .forEach { server ->
+                    if(ignore.isEmpty()) { return server }
                     if(formattedIgnore.contains(server.serverInfo.name.lowercase())) { return@forEach }
-                    return server }
+                    return server
+                }
             return null
         }
     }
