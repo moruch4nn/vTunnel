@@ -9,6 +9,7 @@ import com.velocitypowered.api.event.proxy.ProxyPingEvent
 import com.velocitypowered.api.plugin.Plugin
 import com.velocitypowered.api.proxy.ProxyServer
 import com.velocitypowered.api.proxy.server.RegisteredServer
+import dev.mr3n.vtunnel.tunnel.cachedPingInfo
 import dev.mr3n.vtunnel.tunnel.startTunnelingAllocator
 import java.net.InetSocketAddress
 import java.util.*
@@ -33,7 +34,7 @@ class VTunnel @Inject constructor(val server: ProxyServer, logger: Logger) {
     @Subscribe(order = PostOrder.FIRST)
     fun on(event: ProxyPingEvent) {
         val virtualHostStr = event.connection.virtualHost.map(InetSocketAddress::getHostString).orElse("").lowercase(Locale.ROOT)
-        (customForcedHosts[virtualHostStr]?:tryServer())?.ping()?.get().let(event::setPing)
+        (customForcedHosts[virtualHostStr]?:tryServer())?.cachedPingInfo().let(event::setPing)
     }
 
     @Subscribe(order = PostOrder.FIRST)
