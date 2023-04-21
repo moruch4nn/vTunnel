@@ -17,7 +17,7 @@ import kotlin.concurrent.thread
 import kotlin.jvm.optionals.getOrNull
 
 @Plugin(id = "vtunnel")
-class VTunnel @Inject constructor(val server: ProxyServer, val logger: Logger) {
+class VTunnel @Inject constructor(val server: ProxyServer, logger: Logger) {
     @Subscribe
     fun on(event: ProxyInitializeEvent) {
         thread { startTunnelingAllocator() }
