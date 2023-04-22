@@ -2,6 +2,7 @@ package dev.mr3n.vtunnel.tunnel
 
 import com.velocitypowered.api.proxy.server.RegisteredServer
 import com.velocitypowered.api.proxy.server.ServerPing
+import com.velocitypowered.api.proxy.server.ServerPing.SamplePlayer
 import dev.mr3n.vtunnel.VTunnel
 
 private val cachedPingsInfo = mutableMapOf<String, CachedPingInfo>()
@@ -14,6 +15,7 @@ class CachedPingInfo(val registeredServer: RegisteredServer) {
     private fun getNonCachedInfo(): ServerPing = this.registeredServer.ping().get().asBuilder()
         .onlinePlayers(VTunnel.SERVER.playerCount)
         .maximumPlayers(VTunnel.SERVER.configuration.showMaxPlayers)
+        .clearSamplePlayers()
         .build()
 
     fun get(): ServerPing {
