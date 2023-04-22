@@ -2,7 +2,6 @@ package dev.mr3n.vtunnel.tunnel
 
 import com.velocitypowered.api.proxy.server.RegisteredServer
 import com.velocitypowered.api.proxy.server.ServerPing
-import com.velocitypowered.api.proxy.server.ServerPing.SamplePlayer
 import dev.mr3n.vtunnel.VTunnel
 
 private val cachedPingsInfo = mutableMapOf<String, CachedPingInfo>()
