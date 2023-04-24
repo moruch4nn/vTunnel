@@ -54,6 +54,8 @@ private fun Routing.setupWebSocket() {
             } catch (e: Exception) {
                 e.printStackTrace()
             } finally {
+                try { thisConnection.close() } catch (_: Exception) { }
+
                 VTunnel.LOGGER.info("${initAuth.name}とのブリッジコネクションが切断されました。")
 
                 forcedHosts.forEach(VTunnel.customForcedHosts::remove)
