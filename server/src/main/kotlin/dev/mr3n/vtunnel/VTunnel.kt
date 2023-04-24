@@ -56,7 +56,7 @@ class VTunnel @Inject constructor(val server: ProxyServer, logger: Logger) {
         private val tryFirst = System.getenv("VTUNNEL_TRY")?.split(",")?:listOf()
 
         fun forcedHosts(virtualHostsStr: String): RegisteredServer? {
-            return customForcedHosts[virtualHostsStr]?.let { SERVER.getServer(virtualHostsStr).getOrNull() }
+            return customForcedHosts[virtualHostsStr]?.let { SERVER.getServer(it).getOrNull() }
         }
 
         fun tryServer(vararg ignore: String): RegisteredServer? {
