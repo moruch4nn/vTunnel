@@ -42,7 +42,7 @@ private fun Routing.setupWebSocket() {
             VTunnel.SERVER.getServer(serverName)?.getOrNull()?.serverInfo?.let(VTunnel.SERVER::unregisterServer)
             val info = ServerInfo(serverName, InetSocketAddress("localhost",thisConnection.publicPort))
             val registeredServer = VTunnel.SERVER.registerServer(info)
-            forcedHosts.forEach { VTunnel.customForcedHosts[it] = registeredServer }
+            forcedHosts.forEach { VTunnel.customForcedHosts[it] = registeredServer.serverInfo.name }
 
             try {
                 connections[initAuth.name] = thisConnection

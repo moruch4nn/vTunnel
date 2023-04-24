@@ -28,13 +28,13 @@ class VTunnel @Inject constructor(val server: ProxyServer, logger: Logger) {
     @Subscribe(order = PostOrder.FIRST)
     fun on(event: PlayerChooseInitialServerEvent) {
         val virtualHostStr = event.player.virtualHost.map(InetSocketAddress::getHostString).orElse("").lowercase(Locale.ROOT)
-        (customForcedHosts[virtualHostStr]?:tryServer())?.let(event::setInitialServer)
+        (forcedHosts(virtualHostStr) ?:tryServer())?.let(event::setInitialServer)
     }
 
     @Subscribe(order = PostOrder.FIRST)
     fun on(event: ProxyPingEvent) {
         val virtualHostStr = event.connection.virtualHost.map(InetSocketAddress::getHostString).orElse("").lowercase(Locale.ROOT)
-        (customForcedHosts[virtualHostStr]?:tryServer())?.cachedPingInfo().let(event::setPing)
+        (forcedHosts(virtualHostStr) ?:tryServer())?.cachedPingInfo().let(event::setPing)
     }
 
     @Subscribe(order = PostOrder.FIRST)
@@ -52,8 +52,12 @@ class VTunnel @Inject constructor(val server: ProxyServer, logger: Logger) {
         lateinit var SERVER: ProxyServer
         lateinit var LOGGER: Logger
 
-        val customForcedHosts = mutableMapOf<String,RegisteredServer>()
+        val customForcedHosts = mutableMapOf<String,String>()
         private val tryFirst = System.getenv("VTUNNEL_TRY")?.split(",")?:listOf()
+
+        fun forcedHosts(virtualHostsStr: String): RegisteredServer? {
+            return customForcedHosts[virtualHostsStr]?.let { SERVER.getServer(virtualHostsStr).getOrNull() }
+        }
 
         fun tryServer(vararg ignore: String): RegisteredServer? {
             val formattedIgnore = ignore.map { it.lowercase() }
