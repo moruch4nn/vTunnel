@@ -18,6 +18,7 @@ internal class CachedPingInfo(val serverName: String) {
                 .ping().get().asBuilder()
                 .onlinePlayers(VTunnel.SERVER.playerCount)
                 .maximumPlayers(VTunnel.SERVER.configuration.showMaxPlayers)
+                .also { if(!it.favicon.isPresent) { VTunnel.SERVER.configuration.favicon.ifPresent(it::favicon) } }
                 .clearSamplePlayers()
                 .build()
         } catch (_: Exception) {
