@@ -17,7 +17,7 @@ dependencies {
     implementation("io.ktor:ktor-server-core:2.2.4")
     implementation("io.ktor:ktor-server-websockets:2.2.4")
     implementation("io.ktor:ktor-server-netty:2.2.4")
-    implementation("com.velocitypowered:velocity-api:3.1.1")
+    compileOnly("com.velocitypowered:velocity-api:3.1.1")
     implementation("com.auth0:java-jwt:4.4.0")
     implementation(project(":shared"))
 }

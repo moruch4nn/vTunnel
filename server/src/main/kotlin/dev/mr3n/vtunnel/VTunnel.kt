@@ -53,7 +53,7 @@ class VTunnel @Inject constructor(val server: ProxyServer, logger: Logger) {
         internal lateinit var LOGGER: Logger
 
         val customForcedHosts = mutableMapOf<String,String>()
-        val tryFirst = System.getenv("VTUNNEL_TRY")?.split(",")?:listOf()
+        val tryFirst = (System.getenv("VTUNNEL_TRY")?.split(",")?:listOf()).toMutableList()
 
         fun forcedHosts(virtualHostsStr: String): RegisteredServer? {
             return customForcedHosts[virtualHostsStr]?.let { SERVER.getServer(it).getOrNull() }
