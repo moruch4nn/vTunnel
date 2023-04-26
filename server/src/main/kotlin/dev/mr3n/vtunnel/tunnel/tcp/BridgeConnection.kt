@@ -14,7 +14,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.concurrent.schedule
 import kotlin.concurrent.thread
 
-object BridgeConnection {
+internal object BridgeConnection {
     val port = 60001
     val serverSocket = ServerSocket(port)
 

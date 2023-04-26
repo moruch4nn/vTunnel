@@ -11,7 +11,7 @@ import java.io.Closeable
 import java.net.ServerSocket
 import java.util.concurrent.CopyOnWriteArraySet
 
-class BridgeNotifierConnection(val webSocketServerSession: DefaultWebSocketServerSession): Thread(), Closeable {
+internal class BridgeNotifierConnection(val webSocketServerSession: DefaultWebSocketServerSession): Thread(), Closeable {
     val publicPort = PortManager.port()
     private val public = ServerSocket(publicPort)
 

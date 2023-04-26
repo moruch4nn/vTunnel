@@ -7,7 +7,7 @@ import kotlin.jvm.optionals.getOrNull
 
 private val cachedPingsInfo = mutableMapOf<String, CachedPingInfo>()
 
-class CachedPingInfo(val serverName: String) {
+internal class CachedPingInfo(val serverName: String) {
     private var lastUpdate = System.currentTimeMillis()
 
     private var cachedPing = this.getNonCachedInfo()

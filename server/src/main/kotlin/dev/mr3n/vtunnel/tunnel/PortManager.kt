@@ -1,7 +1,7 @@
 package dev.mr3n.vtunnel.tunnel
 
-object PortManager {
-    private val ports = (60002..61000)
+internal object PortManager {
+    private val ports = 60002..61000
 
     private val usingPorts = mutableListOf<Int>()
 
