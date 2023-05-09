@@ -34,7 +34,7 @@ class VTunnel @Inject constructor(val server: ProxyServer, logger: Logger) {
     @Subscribe(order = PostOrder.FIRST)
     fun on(event: ProxyPingEvent) {
         val virtualHostStr = event.connection.virtualHost.map(InetSocketAddress::getHostString).orElse("").lowercase(Locale.ROOT)
-        (forcedHosts(virtualHostStr) ?:tryServer())?.cachedPingInfo().let(event::setPing)
+        (forcedHosts(virtualHostStr)?:tryServer())?.cachedPingInfo()?.let(event::setPing)
     }
 
     @Subscribe(order = PostOrder.FIRST)
