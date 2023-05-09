@@ -11,13 +11,9 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.bukkit.Bukkit
-import org.bukkit.event.EventHandler
-import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
-import org.bukkit.event.player.PlayerLoginEvent
 import org.bukkit.plugin.java.JavaPlugin
 import java.net.Socket
-import java.util.*
 import kotlin.concurrent.thread
 
 class VTunnel: JavaPlugin(), Listener {
@@ -52,15 +48,14 @@ class VTunnel: JavaPlugin(), Listener {
                            outputSocket.write(Json.encodeToString(AuthFrame(newConn.token)).toByteArray())
                            outputSocket.flush()
                            val clientSocket = Socket("127.0.0.1", server.port)
+                           logger.info("vTunnelサーバーに接続しました。")
                            PacketTransfer(bridgeSocket, clientSocket)
                        } catch (e: Exception) {
                            e.printStackTrace()
                        }
                    }
                }
-           } catch (e: Exception) {
-               e.printStackTrace()
-           }
+           } catch (_: Exception) { }
             logger.warning("vTunnelとの接続が切断されたため5秒後に再接続を行います。")
             Thread.sleep(5000)
         }
