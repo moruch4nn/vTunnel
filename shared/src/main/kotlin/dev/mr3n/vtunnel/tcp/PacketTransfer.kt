@@ -28,11 +28,7 @@ class PacketTransfer(private val socket1: Socket, private val socket2: Socket): 
                 outputStream.write(buffer,0,len)
                 outputStream.flush()
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        } finally {
-            this.close()
-        }
+        } catch (_: Exception) { } finally { this.close() }
     }
     fun closeProcess(process: ()->Unit) { this.closeProcesses.add(process) }
     override fun close() {
