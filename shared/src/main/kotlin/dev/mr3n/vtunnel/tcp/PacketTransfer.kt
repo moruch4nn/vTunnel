@@ -18,26 +18,35 @@ class PacketTransfer(private val socket1: Socket, private val socket2: Socket): 
         this.transfer(socket2.getInputStream(),socket1.getOutputStream())
     }
     private fun transfer(inputStream: InputStream, outputStream: OutputStream) {
-        this.streams.add(inputStream)
-        this.streams.add(outputStream)
-        val buffer = ByteArray(60000)
-        while (true) {
-            try {
+        try {
+            this.streams.add(inputStream)
+            this.streams.add(outputStream)
+            val buffer = ByteArray(60000)
+            while (true) {
                 val len = inputStream.read(buffer)
                 if(len == -1) { break }
                 outputStream.write(buffer,0,len)
                 outputStream.flush()
-            } catch (_: Exception) { break }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            this.close()
         }
-        this.close()
     }
     fun closeProcess(process: ()->Unit) { this.closeProcesses.add(process) }
     override fun close() {
+        // すでにPacketTransferが閉じている場合はreturn
         if(this.isClosed) { return }
+        // PacketTransferを閉じている状態にする
         this.isClosed = true
+        // すべてのStreamを閉じる(InputStream,OutputStreamなど)
         this.streams.forEach(Closeable::close)
-        if(socket1.isClosed) { this.socket1.close() }
-        if(socket2.isClosed) { this.socket2.close() }
+        // socket1が閉じていない場合は閉じる閉じる
+        if(!this.socket1.isClosed) { this.socket1.close() }
+        // socket2が閉じていない場合は閉じる
+        if(!this.socket2.isClosed) { this.socket2.close() }
+        // close時に実行するすべての処理を実行
         this.closeProcesses.forEach { it.invoke() }
     }
 }
