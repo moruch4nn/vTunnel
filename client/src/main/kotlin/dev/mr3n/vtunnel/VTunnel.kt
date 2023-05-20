@@ -40,6 +40,7 @@ class VTunnel: JavaPlugin(), Listener {
            try {
                client.webSocket(host = host, port = 60000, path = "/vtunnel") {
                    sendSerialized(AuthFrame(token))
+                   logger.info("vTunnelサーバーに接続しました。")
                    while (true) {
                        val newConn: NewConnectionNotify = receiveDeserialized()
                        try {
@@ -48,7 +49,6 @@ class VTunnel: JavaPlugin(), Listener {
                            outputSocket.write(Json.encodeToString(AuthFrame(newConn.token)).toByteArray())
                            outputSocket.flush()
                            val clientSocket = Socket("127.0.0.1", server.port)
-                           logger.info("vTunnelサーバーに接続しました。")
                            PacketTransfer(bridgeSocket, clientSocket)
                        } catch (e: Exception) {
                            e.printStackTrace()
