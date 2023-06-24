@@ -31,9 +31,7 @@ internal class BridgeNotifierConnection(val webSocketServerSession: DefaultWebSo
 
                 val token = JWT.create().withClaim("id", id).sign(algorithm)
                 runBlocking { webSocketServerSession.sendSerialized(NewConnectionNotify(BridgeConnection.port,token)) }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
+            } catch (_: Exception) { }
         }
     }
 

@@ -31,11 +31,11 @@ class VTunnel: JavaPlugin(), Listener {
                 setUsesAuthentication.invoke(minecraftServer, false)
             } catch (_: Exception) {
                 try {
-                    val g = minecraftServer::class.java.getMethod("g", Boolean::class.java).accessible()
+                    val g = minecraftServer::class.java.getMethod("d", Boolean::class.java).accessible()
                     g.invoke(minecraftServer, false)
                 } catch (_: Exception) {
                     logger.warning("============================================================")
-                    logger.warning("サーバープロパティのonline-modeの項目をfalseに変更してください。")
+                    logger.warning("Change the online-mode item in the server.properties to false.")
                     logger.warning("============================================================")
                     server.shutdown()
                 }
@@ -58,8 +58,8 @@ class VTunnel: JavaPlugin(), Listener {
         while (true) {
            try {
                client.webSocket(host = host, port = 60000, path = "/vtunnel") {
+                   // Successfully connected to server
                    sendSerialized(AuthFrame(token))
-                   logger.info("vTunnelサーバーに接続しました。")
                    while (true) {
                        val newConn: NewConnectionNotify = receiveDeserialized()
                        try {
@@ -75,8 +75,7 @@ class VTunnel: JavaPlugin(), Listener {
                    }
                }
            } catch (_: Exception) { }
-            logger.warning("vTunnelとの接続が切断されたため5秒後に再接続を行います。")
-            Thread.sleep(5000)
+            Thread.sleep(30000) // when disconnected from the velocity, wait 30 seconds then reconnecting to velocity
         }
     }
 }

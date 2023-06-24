@@ -50,16 +50,12 @@ internal fun Routing.setupWebSocket() {
             try {
                 connections[initAuth.name] = thisConnection
 
-                VTunnel.LOGGER.info("${serverName}との新しいブリッジコネクションを確立しました。")
-
                 for (frame in incoming) {  }
 
             } catch (e: Exception) {
                 e.printStackTrace()
             } finally {
                 try { thisConnection.close() } catch (_: Exception) { }
-
-                VTunnel.LOGGER.info("${initAuth.name}とのブリッジコネクションが切断されました。")
 
                 forcedHosts.forEach(VTunnel.customForcedHosts::remove)
                 VTunnel.SERVER.unregisterServer(info)
