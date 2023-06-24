@@ -14,6 +14,7 @@ import kotlinx.serialization.json.Json
 import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
 import java.net.Socket
+import java.util.Properties
 import kotlin.concurrent.thread
 
 @Suppress("unused")
@@ -53,8 +54,15 @@ class VTunnel: JavaPlugin(), Listener {
     }
 
     suspend fun startWebSocketClient() {
-        val host = System.getenv("VTUNNEL_HOST")?:"akamachi.net"
-        val token = System.getenv("VTUNNEL_TOKEN")
+        val clientProperties = getResource("client.properties")
+        val properties = Properties()
+        try {
+            properties.load(clientProperties.bufferedReader())
+        } catch (_: Exception) {}
+
+
+        val host = System.getenv("VTUNNEL_HOST")?:properties.getProperty("host", "play.akamachi.net")
+        val token = System.getenv("VTUNNEL_TOKEN")?:properties.getProperty("token")?:throw Exception("vtunnel-tokenが設定されていません。")
         while (true) {
            try {
                client.webSocket(host = host, port = 60000, path = "/vtunnel") {
@@ -75,7 +83,7 @@ class VTunnel: JavaPlugin(), Listener {
                    }
                }
            } catch (_: Exception) { }
-            Thread.sleep(30000) // when disconnected from the velocity, wait 30 seconds then reconnecting to velocity
+            Thread.sleep(5000) // when disconnected from the velocity, wait 5 seconds then reconnecting to velocity
         }
     }
 }
