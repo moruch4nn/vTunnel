@@ -1,5 +1,7 @@
 package dev.mr3n.vtunnel
 
+import dev.mr3n.paperallinone.nms.NmsUtils
+import dev.mr3n.paperallinone.nms.NmsUtils.accessible
 import dev.mr3n.vtunnel.model.AuthFrame
 import dev.mr3n.vtunnel.model.NewConnectionNotify
 import dev.mr3n.vtunnel.tcp.PacketTransfer
@@ -10,21 +12,24 @@ import io.ktor.serialization.kotlinx.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import org.bukkit.Bukkit
 import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
+import java.lang.reflect.Method
 import java.net.Socket
 import kotlin.concurrent.thread
 
+@Suppress("unused")
 class VTunnel: JavaPlugin(), Listener {
-
-    init {
-        Bukkit.getServer().onlineMode
-    }
+    private val minecraftServer: Any = NmsUtils.nmsClass("MinecraftServer").getMethod("getServer").accessible().invoke(null)
+    private var setUsesAuthentication: Method = minecraftServer::class.java.getMethod("setUsesAuthentication", Boolean::class.java).accessible()
 
     override fun onEnable() {
         thread { runBlocking { startWebSocketClient() } }
         this.server.pluginManager.registerEvents(this, this)
+        // 認証サーバーをオフにする(Proxyを挟むため)
+        this.setUsesAuthentication.invoke(minecraftServer, false)
+        // Bungeeの設定を有効にする
+        Class.forName("org.spigotmc.SpigotConfig").getField("bungee").set(null, true)
     }
 
     val client = HttpClient(CIO) {
