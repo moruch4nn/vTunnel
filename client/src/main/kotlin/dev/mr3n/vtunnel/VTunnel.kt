@@ -1,6 +1,5 @@
 package dev.mr3n.vtunnel
 
-import dev.mr3n.paperallinone.nms.NmsUtils
 import dev.mr3n.paperallinone.nms.NmsUtils.accessible
 import dev.mr3n.vtunnel.model.AuthFrame
 import dev.mr3n.vtunnel.model.NewConnectionNotify
@@ -14,20 +13,35 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
-import java.lang.reflect.Method
 import java.net.Socket
 import kotlin.concurrent.thread
 
 @Suppress("unused")
 class VTunnel: JavaPlugin(), Listener {
-    private val minecraftServer: Any = NmsUtils.nmsClass("MinecraftServer").getMethod("getServer").accessible().invoke(null)
-    private var setUsesAuthentication: Method = minecraftServer::class.java.getMethod("setUsesAuthentication", Boolean::class.java).accessible()
+    private val minecraftServer: Any = Class.forName("net.minecraft.server.MinecraftServer").getMethod("getServer").accessible().invoke(null)
 
     override fun onEnable() {
         thread { runBlocking { startWebSocketClient() } }
         this.server.pluginManager.registerEvents(this, this)
         // 認証サーバーをオフにする(Proxyを挟むため)
-        this.setUsesAuthentication.invoke(minecraftServer, false)
+
+        if(this.server.onlineMode) {
+            try {
+                val setUsesAuthentication = minecraftServer::class.java.getMethod("setUsesAuthentication", Boolean::class.java).accessible()
+                setUsesAuthentication.invoke(minecraftServer, false)
+            } catch (_: Exception) {
+                try {
+                    val g = minecraftServer::class.java.getMethod("g", Boolean::class.java).accessible()
+                    g.invoke(minecraftServer, false)
+                } catch (_: Exception) {
+                    logger.warning("============================================================")
+                    logger.warning("サーバープロパティのonline-modeの項目をfalseに変更してください。")
+                    logger.warning("============================================================")
+                    server.shutdown()
+                }
+            }
+        }
+
         // Bungeeの設定を有効にする
         Class.forName("org.spigotmc.SpigotConfig").getField("bungee").set(null, true)
     }
