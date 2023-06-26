@@ -46,6 +46,7 @@ class VTunnel @Inject constructor(val server: ProxyServer, logger: Logger) {
     @Subscribe(order = PostOrder.FIRST)
     fun on(event: PreLoginEvent) {
         val conn = event.connection
+        playerAddresses[event.username] = event.connection.remoteAddress
         val delegate = conn::class.java.getDeclaredField("delegate")
             .also { it.isAccessible = true }.get(conn)
         this.coverAddress(delegate)
@@ -73,12 +74,15 @@ class VTunnel @Inject constructor(val server: ProxyServer, logger: Logger) {
         internal lateinit var SERVER: ProxyServer
         internal lateinit var LOGGER: Logger
 
+        private val playerAddresses = mutableMapOf<String, InetSocketAddress>()
         val customForcedHosts = mutableMapOf<String,String>()
         val tryFirst = (System.getenv("VTUNNEL_TRY")?.split(",")?:listOf()).toMutableList()
 
         fun forcedHosts(virtualHostsStr: String): RegisteredServer? {
             return customForcedHosts[virtualHostsStr]?.let { SERVER.getServer(it).getOrNull() }
         }
+
+        fun getIpAddress(username: String): InetSocketAddress? = playerAddresses[username]
 
         fun tryServer(vararg ignore: String): RegisteredServer? {
             val formattedIgnore = ignore.map { it.lowercase() }
