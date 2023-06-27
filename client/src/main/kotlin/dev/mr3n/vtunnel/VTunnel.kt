@@ -21,8 +21,9 @@ import kotlin.concurrent.thread
 class VTunnel: JavaPlugin(), Listener {
     private val minecraftServer: Any = Class.forName("net.minecraft.server.MinecraftServer").getMethod("getServer").accessible().invoke(null)
 
+
+
     override fun onEnable() {
-        thread { runBlocking { startWebSocketClient() } }
         this.server.pluginManager.registerEvents(this, this)
         // 認証サーバーをオフにする(Proxyを挟むため)
 
@@ -45,6 +46,11 @@ class VTunnel: JavaPlugin(), Listener {
 
         // Bungeeの設定を有効にする
         Class.forName("org.spigotmc.SpigotConfig").getField("bungee").set(null, true)
+
+        if(!Thread.getAllStackTraces().keys.any { it.name == "vtunnel-client" }) {
+            // vtunnelが起動していない場合は起動する
+            thread(name = "vtunnel-client") { runBlocking { startWebSocketClient() } }
+        }
     }
 
     val client = HttpClient(CIO) {
@@ -85,5 +91,9 @@ class VTunnel: JavaPlugin(), Listener {
            } catch (_: Exception) { }
             Thread.sleep(5000) // when disconnected from the velocity, wait 5 seconds then reconnecting to velocity
         }
+    }
+
+    companion object {
+
     }
 }
