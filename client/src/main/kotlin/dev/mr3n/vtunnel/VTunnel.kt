@@ -50,6 +50,9 @@ class VTunnel: JavaPlugin(), Listener {
         if(!Thread.getAllStackTraces().keys.any { it.name == "vtunnel-client" }) {
             // vtunnelが起動していない場合は起動する
             thread(name = "vtunnel-client") { runBlocking { startWebSocketClient() } }
+            logger.info("vTunnelサーバーに接続中です。")
+        } else {
+            logger.info("すでに別スレッドでvTunnelが稼働しているため接続をスキップします(これは正常な処理です。)")
         }
     }
 
@@ -74,6 +77,7 @@ class VTunnel: JavaPlugin(), Listener {
                client.webSocket(host = host, port = 60000, path = "/vtunnel") {
                    // Successfully connected to server
                    sendSerialized(AuthFrame(token))
+                   logger.info("vTunnelサーバーへの接続が正常に完了しました。")
                    while (true) {
                        val newConn: NewConnectionNotify = receiveDeserialized()
                        try {
@@ -89,6 +93,7 @@ class VTunnel: JavaPlugin(), Listener {
                    }
                }
            } catch (_: Exception) { }
+            logger.warning("vTunnelサーバーから切断されたため5秒後に再接続を行います。")
             Thread.sleep(5000) // when disconnected from the velocity, wait 5 seconds then reconnecting to velocity
         }
     }
