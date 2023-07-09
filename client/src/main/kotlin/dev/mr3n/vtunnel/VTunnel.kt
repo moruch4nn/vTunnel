@@ -1,6 +1,7 @@
 package dev.mr3n.vtunnel
 
 import dev.mr3n.paperallinone.nms.NmsUtils.accessible
+import dev.mr3n.paperallinone.task.runTaskTimer
 import dev.mr3n.vtunnel.model.AuthFrame
 import dev.mr3n.vtunnel.model.NewConnectionNotify
 import dev.mr3n.vtunnel.tcp.PacketTransfer
@@ -21,7 +22,24 @@ import kotlin.concurrent.thread
 class VTunnel: JavaPlugin(), Listener {
     private val minecraftServer: Any = Class.forName("net.minecraft.server.MinecraftServer").getMethod("getServer").accessible().invoke(null)
 
+    private var vTunnelThread: Thread? = null
 
+    private var isStartedWatchDog = false
+
+    /**
+     * vTunnelのwatchDogを開始する
+     */
+    private fun startWatchDog() {
+        // watchDogがすでに起動している場合はreturn
+        if(this.isStartedWatchDog) { return }
+        this.isStartedWatchDog = true
+        logger.info("watchDogを起動しました。")
+        this.runTaskTimer(20*5L, 20*5L) { _ ,_ ->
+            if(vTunnelThread?.isAlive == true) { return@runTaskTimer }
+            logger.info("vTunnelが切断されたため再接続を試みます。")
+            this.vTunnelThread = thread(name = "vtunnel-client") { runBlocking { startWebSocketClient() } }
+        }
+    }
 
     override fun onEnable() {
         this.server.pluginManager.registerEvents(this, this)
@@ -37,7 +55,7 @@ class VTunnel: JavaPlugin(), Listener {
                     g.invoke(minecraftServer, false)
                 } catch (_: Exception) {
                     logger.warning("============================================================")
-                    logger.warning("Change the online-mode item in the server.properties to false.")
+                    logger.warning("Change the online-mode value in the server.properties to false.")
                     logger.warning("============================================================")
                     server.shutdown()
                 }
@@ -47,13 +65,15 @@ class VTunnel: JavaPlugin(), Listener {
         // Bungeeの設定を有効にする
         Class.forName("org.spigotmc.SpigotConfig").getField("bungee").set(null, true)
 
-        if(!Thread.getAllStackTraces().keys.any { it.name == "vtunnel-client" }) {
-            // vtunnelが起動していない場合は起動する
-            thread(name = "vtunnel-client") { runBlocking { startWebSocketClient() } }
-            logger.info("vTunnelサーバーに接続中です。")
-        } else {
+        val threads = Thread.getAllStackTraces().keys
+
+        val thread = threads.filter { it.isAlive }.find { it.name == "vtunnel-client" }
+
+        if(thread != null) {
+            this.vTunnelThread = thread
             logger.info("すでに別スレッドでvTunnelが稼働しているため接続をスキップします(これは正常な処理です。)")
         }
+        this.startWatchDog()
     }
 
     val client = HttpClient(CIO) {
@@ -72,30 +92,26 @@ class VTunnel: JavaPlugin(), Listener {
 
         val host = System.getenv("VTUNNEL_HOST")?:properties.getProperty("host", "play.akamachi.net")
         val token = System.getenv("VTUNNEL_TOKEN")?:properties.getProperty("token")?:throw Exception("vtunnel-tokenが設定されていません。")
-        while (true) {
-           try {
-               client.webSocket(host = host, port = 60000, path = "/vtunnel") {
-                   // Successfully connected to server
-                   sendSerialized(AuthFrame(token))
-                   logger.info("vTunnelサーバーへの接続が正常に完了しました。")
-                   while (true) {
-                       val newConn: NewConnectionNotify = receiveDeserialized()
-                       try {
-                           val bridgeSocket = Socket(host, newConn.port)
-                           val outputSocket = bridgeSocket.getOutputStream()
-                           outputSocket.write(Json.encodeToString(AuthFrame(newConn.token)).toByteArray())
-                           outputSocket.flush()
-                           val clientSocket = Socket("127.0.0.1", server.port)
-                           PacketTransfer(bridgeSocket, clientSocket)
-                       } catch (e: Exception) {
-                           e.printStackTrace()
-                       }
-                   }
-               }
-           } catch (_: Exception) { }
-            logger.warning("vTunnelサーバーから切断されたため5秒後に再接続を行います。")
-            Thread.sleep(5000) // when disconnected from the velocity, wait 5 seconds then reconnecting to velocity
-        }
+        try {
+            client.webSocket(host = host, port = 60000, path = "/vtunnel") {
+                // Successfully connected to server
+                sendSerialized(AuthFrame(token))
+                logger.info("vTunnelサーバーへの接続が正常に完了しました。")
+                while (true) {
+                    val newConn: NewConnectionNotify = receiveDeserialized()
+                    try {
+                        val bridgeSocket = Socket(host, newConn.port)
+                        val outputSocket = bridgeSocket.getOutputStream()
+                        outputSocket.write(Json.encodeToString(AuthFrame(newConn.token)).toByteArray())
+                        outputSocket.flush()
+                        val clientSocket = Socket("127.0.0.1", server.port)
+                        PacketTransfer(bridgeSocket, clientSocket)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+            }
+        } catch (_: Exception) { }
     }
 
     companion object {

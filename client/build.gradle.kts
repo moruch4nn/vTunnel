@@ -18,7 +18,7 @@ dependencies {
     compileOnly("org.spigotmc:spigot-api:1.8-R0.1-SNAPSHOT")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
     implementation("com.auth0:java-jwt:4.4.0")
-    implementation("com.github.moruch4nn:PaperAllInOne:a73656dbe7")
+    implementation("com.github.moruch4nn:PaperAllInOne:852cbd13c0")
     implementation("io.ktor:ktor-client-core:2.2.4")
     implementation("io.ktor:ktor-serialization-kotlinx-json:2.2.4")
     implementation("io.ktor:ktor-client-cio:2.2.4")
