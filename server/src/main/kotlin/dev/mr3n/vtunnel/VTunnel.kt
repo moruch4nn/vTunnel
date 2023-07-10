@@ -10,8 +10,12 @@ import com.velocitypowered.api.event.proxy.ProxyPingEvent
 import com.velocitypowered.api.plugin.Plugin
 import com.velocitypowered.api.proxy.ProxyServer
 import com.velocitypowered.api.proxy.server.RegisteredServer
+import dev.mr3n.vtunnel.events.ServerCloseEvent
+import dev.mr3n.vtunnel.events.ServerStartEvent
 import dev.mr3n.vtunnel.tunnel.cachedPingInfo
 import dev.mr3n.vtunnel.tunnel.startTunnelingAllocator
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.util.*
@@ -30,6 +34,26 @@ class VTunnel @Inject constructor(val server: ProxyServer, logger: Logger) {
             .also { it.isAccessible = true }.get(conn)
         mcConn::class.java.getDeclaredField("remoteAddress")
             .also { it.isAccessible = true }.set(mcConn, inetSocketAddress)
+    }
+
+    @Subscribe
+    fun on(event: ServerStartEvent) {
+        val component = Component.text("[運営向け] ", NamedTextColor.DARK_RED).append(Component.text(event.serverName, NamedTextColor.RED)).append(Component.text(" サーバーがvTunnelへ接続されました。", NamedTextColor.WHITE))
+        server.allPlayers.forEach { player ->
+            if(player.hasPermission("vtunnel.notify")) {
+                player.sendMessage(component)
+            }
+        }
+    }
+
+    @Subscribe
+    fun on(event: ServerCloseEvent) {
+        val component = Component.text("[運営向け] ", NamedTextColor.DARK_RED).append(Component.text(event.serverName, NamedTextColor.RED)).append(Component.text(" サーバーがvTunnelから切断されました。", NamedTextColor.WHITE))
+        server.allPlayers.forEach { player ->
+            if(player.hasPermission("vtunnel.notify")) {
+                player.sendMessage(component)
+            }
+        }
     }
 
     @Subscribe(order = PostOrder.FIRST)
