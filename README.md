@@ -28,7 +28,7 @@ VTUNNEL_TRY: "サーバー名1,サーバー名2" (optional)
 ```
 ### サーバーサイドの設定
 1.サーバーにvTunnelプラグインを導入します。<br>
-2.JWTトークンを[ここ](https://jwt.io/)から生成する(下記参照)<br>
+2.JWTトークンを[ここ]([https://jwt.io/](https://jwt.io/#debugger-io?token=eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoi44K144O844OQ44O85ZCNKOWNiuinkuiLseaVsOWtl-ODj-OCpOODleODsygtKeOAgeOCouODs-ODgOODvOODkOODvChfKeOBruOBv-OAgikiLCJmb3JjZWRfaG9zdHMiOlsiIl0sImV4cCI6MTAwMDAwMDAwMDAwMCwiaXNzIjoidG9rZW7jga7kvZzmiJDogIUiLCJhdWQiOlsi5L2_55So6ICF5oOz5a6aKOmBqeW9k-OBq-WFpeOCjOOBpuWkp-S4iOWkq-OBp-OBmSkiXX0.nXdODR_g-sH9aB7OHxRDRDzHx-zt6YYBfUP5w7pQbDnHvu3FzYpcOTw4JC-6VJEZuNBPDMkiWaEfxEjlDbnOMQ))から生成する(下記参照)<br>
 2.下記の環境変数を設定する<br>
 #### JWTトークンの項目
 ```yaml
@@ -37,11 +37,11 @@ Algorithm: HS512
 your-256-bit-secret: """上で設定した$VTUNNEL_SECRETの値"""
 
 PAYLOAD:
-    name: lobby, #Velocityに登録するサーバー名
-    forced_hosts: ["lobby.example.com","main.example.com"], #Velocityに登録するforcedHostsのアドレス
-    exp: 1000000000000, #このトークンの有効期限(unix_time/sec)
-    iss: moruch4nn, #このトークンの発行者(適当で構いません)
-    aud: [サーバー運営], #このトークンの想定利用者(適当で構いません)
+    name: lobby, #(require)Velocityに登録するサーバー名
+    forced_hosts: ["lobby.example.com","main.example.com"], #(optional)Velocityに登録するforcedHostsのアドレス
+    exp: 1000000000000, #(require)このトークンの有効期限(unix_time/sec)
+    iss: moruch4nn, #(require)このトークンの発行者(適当で構いません)
+    aud: ["小サーバー用"], #(require)このトークンの想定利用者(適当で構いません)
 ```
 ### 環境変数
 ```yaml
